@@ -17,7 +17,6 @@ app.use(morgan('combined'));
 app.use(cors());
 app.use(helmet());
 
-
 connectDB();
 
 const swaggerOptions = {
@@ -35,19 +34,9 @@ const swaggerOptions = {
 const swaggerDocs = swaggerJsDoc(swaggerOptions);
 app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerDocs));
 
-// Importar y ejecutar los consumidores
 
 app.use("/api/users", userRoutes);
 
-// app.use((err, req, res, next) => {
-//   console.error('Error:', err.message);
-//   console.error('Stack:', err.stack);
-//   if (err.type === 'entity.parse.failed') {
-//     res.status(400).send({ error: 'Bad Request: Invalid JSON' });
-//   } else {
-//     res.status(500).send({ error: 'Internal Server Error' });
-//   }
-// });
 
 app.listen(port, '0.0.0.0', () => {
   console.log(`Server running on port ${port}`);
