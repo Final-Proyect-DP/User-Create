@@ -31,7 +31,7 @@ const run = async () => {
 
         const user = await User.findByIdAndDelete(id);
         if (user) {
-          console.log('User deleted successfully:', user);
+          console.log('User deleted successfully:', user.id);
         } else {
           console.log('User not found:', id);
         }

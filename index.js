@@ -1,3 +1,4 @@
+require('dotenv').config();
 const express = require("express");
 const bodyParser = require("body-parser");
 const cors = require("cors");
@@ -7,7 +8,6 @@ const swaggerJsDoc = require("swagger-jsdoc");
 const swaggerUi = require("swagger-ui-express");
 const userRoutes = require("./routes/userRoutes");
 const connectDB = require('./config/dbConfig');
-require('dotenv').config();
 const deleteUserConsumer = require('./consumers/userDeleteConsumer');
 
 const app = express();
@@ -39,15 +39,15 @@ app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerDocs));
 
 app.use("/api/users", userRoutes);
 
-app.use((err, req, res, next) => {
-  console.error('Error:', err.message);
-  console.error('Stack:', err.stack);
-  if (err.type === 'entity.parse.failed') {
-    res.status(400).send({ error: 'Bad Request: Invalid JSON' });
-  } else {
-    res.status(500).send({ error: 'Internal Server Error' });
-  }
-});
+// app.use((err, req, res, next) => {
+//   console.error('Error:', err.message);
+//   console.error('Stack:', err.stack);
+//   if (err.type === 'entity.parse.failed') {
+//     res.status(400).send({ error: 'Bad Request: Invalid JSON' });
+//   } else {
+//     res.status(500).send({ error: 'Internal Server Error' });
+//   }
+// });
 
 app.listen(port, '0.0.0.0', () => {
   console.log(`Server running on port ${port}`);
