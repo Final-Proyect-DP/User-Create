@@ -7,6 +7,15 @@ exports.createUser = async (req, res) => {
   try {
     await connectProducer();
     console.log('Request to create a new user:', req.body);
+
+    // Verificar que todos los campos requeridos están presentes
+    const requiredFields = ['username', 'email', 'password', 'firstName', 'lastName', 'address', 'phone', 'semester', 'parallel', 'career', 'description'];
+    for (const field of requiredFields) {
+      if (!req.body[field]) {
+        throw new Error(`Field ${field} is required`);
+      }
+    }
+
     const user = new User(req.body);
     await user.save();
     console.log('User saved to database:', user);

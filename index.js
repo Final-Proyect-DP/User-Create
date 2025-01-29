@@ -1,5 +1,4 @@
 const express = require("express");
-const mongoose = require("mongoose");
 const bodyParser = require("body-parser");
 const cors = require("cors");
 const helmet = require("helmet");
@@ -7,32 +6,19 @@ const morgan = require("morgan");
 const swaggerJsDoc = require("swagger-jsdoc");
 const swaggerUi = require("swagger-ui-express");
 const userRoutes = require("./routes/userRoutes");
+const connectDB = require('./config/dbConfig');
 require('dotenv').config();
 const deleteUserConsumer = require('./consumers/userDeleteConsumer');
 
 const app = express();
 const port = process.env.PORT || 3000;
-
+app.use(bodyParser.json({ limit: '10mb' })); //midelware
 app.use(morgan('combined'));
-app.use(bodyParser.json({ limit: '10mb' }));
-
-const corsOptions = {
-  origin: '*',
-  methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
-  preflightContinue: false,
-  optionsSuccessStatus: 204
-};
-app.use(cors(corsOptions));
-
+app.use(cors());
 app.use(helmet());
 
-mongoose
-  .connect(process.env.MONGO_URI, {
-    useNewUrlParser: true,
-    useUnifiedTopology: true
-  })
-  .then(() => console.log("MongoDB connected"))
-  .catch((err) => console.log(err));
+
+connectDB();
 
 const swaggerOptions = {
   swaggerDefinition: {
