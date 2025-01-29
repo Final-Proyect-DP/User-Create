@@ -1,22 +1,9 @@
 const kafka = require('../config/kafkaConfig');
-const crypto = require('crypto');
+const { decryptMessage } = require('../services/userService');
 const User = require('../models/User');
 require('dotenv').config();
 
 const consumer = kafka.consumer({ groupId: 'create-service-group' });
-
-const algorithm = 'aes-256-cbc';
-const key = Buffer.from(process.env.ENCRYPTION_KEY, 'hex');
-const iv = Buffer.from(process.env.ENCRYPTION_IV, 'hex');
-
-const decrypt = (text) => {
-  let iv = Buffer.from(text.iv, 'hex');
-  let encryptedText = Buffer.from(text.encryptedData, 'hex');
-  let decipher = crypto.createDecipheriv(algorithm, key, iv);
-  let decrypted = decipher.update(encryptedText);
-  decrypted = Buffer.concat([decrypted, decipher.final()]);
-  return decrypted.toString();
-};
 
 const run = async () => {
   try {
@@ -36,7 +23,7 @@ const run = async () => {
           return;
         }
         console.log('Encrypted message:', encryptedMessage);
-        const decryptedMessage = decrypt(encryptedMessage);
+        const decryptedMessage = decryptMessage(encryptedMessage);
         console.log('Decrypted message:', decryptedMessage);
         const { id } = JSON.parse(decryptedMessage);
 
@@ -44,7 +31,7 @@ const run = async () => {
 
         const user = await User.findByIdAndDelete(id);
         if (user) {
-          console.log('User deleted successfully:', user);
+          console.log('User deleted successfully:', user.id);
         } else {
           console.log('User not found:', id);
         }

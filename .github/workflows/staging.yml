@@ -29,7 +29,7 @@ jobs:
         id: meta
         uses: docker/metadata-action@v5
         with:
-          images: byvoxel/php_test
+          images: byvoxel/user-create
           tags: |
             type=raw,value=pr-${{ github.event.pull_request.number }}
             type=sha
@@ -70,12 +70,12 @@ jobs:
           script: |
             set -e
             echo "Deploying image: $TAG"
-            sudo docker stop php_test || true
-            sudo docker rm php_test || true
-            sudo docker pull byvoxel/php_test:$TAG
+            sudo docker stop user-create || true
+            sudo docker rm user-create || true
+            sudo docker pull byvoxel/user-create:$TAG
             sudo docker run -d \
-              --name php_test \
-              -p 80:80 \
+              --name user-create \
+              -p 3000:3020 \
               --restart unless-stopped \
-              byvoxel/php_test:$TAG
+              byvoxel/user-create:$TAG
             sudo docker system prune -af --volumes || true
