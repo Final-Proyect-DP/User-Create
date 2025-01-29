@@ -1,2 +1,4 @@
-git install
-crear un .env con MONGO_URI=mongodb://<IP_MONGO>:27017/Users
+# Domain: User
+# docker run:
+
+docker run -it --rm -d -p 3000:3020 --name create-users byvoxel/create-users:latest
