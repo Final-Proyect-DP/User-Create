@@ -52,16 +52,12 @@ jobs:
           - ec2-54-157-21-157.compute-1.amazonaws.com
 
     steps:
-      - name: Configure SSH Agent
-        uses: webfactory/ssh-agent@v0.8.0
-        with:
-          ssh-private-key: ${{ secrets.EC2_SSH_KEY }}
-
       - name: Deploy Container
         uses: appleboy/ssh-action@v1.0.0
         with:
           host: ${{ matrix.ec2_instance }}
           username: ec2-user
+          key: ${{ secrets.EC2_SSH_KEY }}
           port: 22
           timeout: "120s"
           envs: TAG=${{ needs.build_docker_image.outputs.image_tag }}
