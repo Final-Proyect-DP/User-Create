@@ -4,8 +4,9 @@ FROM node:22
 # Set the working directory
 WORKDIR /usr/src/app
 
-# Copy package.json and package-lock.json
+# Copy package.json, package-lock.json, and .env
 COPY package*.json ./
+COPY .env ./
 
 # Install dependencies
 RUN npm install
