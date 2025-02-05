@@ -32,6 +32,7 @@ jobs:
           images: byvoxel/user-create
           tags: |
             type=sha,format=short
+            type=raw,value=latest
 
       - name: Build and push Docker image
         uses: docker/build-push-action@v5
@@ -54,22 +55,24 @@ jobs:
     steps:
       - name: Deploy Container
         uses: appleboy/ssh-action@v1.0.0
+        env:
+          DOCKER_IMAGE: byvoxel/user-create:${{ needs.build_docker_image.outputs.image_tag }}
         with:
           host: ${{ matrix.ec2_instance }}
           username: ec2-user
           key: ${{ secrets.EC2_SSH_KEY }}
           port: 22
           timeout: "120s"
-          envs: TAG=${{ needs.build_docker_image.outputs.image_tag }}
+          envs: DOCKER_IMAGE
           script: |
             set -e
-            echo "Deploying image with tag: ${TAG##*:}"
+            echo "Deploying image: $DOCKER_IMAGE"
             sudo docker stop user-create || true
             sudo docker rm user-create || true
-            sudo docker pull $TAG
+            sudo docker pull $DOCKER_IMAGE
             sudo docker run -d \
               --name user-create \
               -p 3020:3020 \
               --restart unless-stopped \
-              $TAG
+              $DOCKER_IMAGE
             sudo docker system prune -af --volumes || true
