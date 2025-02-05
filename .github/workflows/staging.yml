@@ -31,15 +31,14 @@ jobs:
         with:
           images: byvoxel/user-create
           tags: |
-            type=sha,format=short
-            type=raw,value=latest
-
+            type=raw,value=staging
+          
       - name: Build and push Docker image
         uses: docker/build-push-action@v5
         with:
           context: .
           push: true
-          tags: ${{ steps.meta.outputs.tags }}
+          tags: byvoxel/user-create:staging
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
@@ -55,24 +54,21 @@ jobs:
     steps:
       - name: Deploy Container
         uses: appleboy/ssh-action@v1.0.0
-        env:
-          DOCKER_IMAGE: byvoxel/user-create:${{ needs.build_docker_image.outputs.image_tag }}
         with:
           host: ${{ matrix.ec2_instance }}
           username: ec2-user
           key: ${{ secrets.EC2_SSH_KEY }}
           port: 22
           timeout: "120s"
-          envs: DOCKER_IMAGE
           script: |
             set -e
-            echo "Deploying image: $DOCKER_IMAGE"
+            echo "Deploying image: byvoxel/user-create:staging"
             sudo docker stop user-create || true
             sudo docker rm user-create || true
-            sudo docker pull $DOCKER_IMAGE
+            sudo docker pull byvoxel/user-create:staging
             sudo docker run -d \
               --name user-create \
               -p 3020:3020 \
               --restart unless-stopped \
-              $DOCKER_IMAGE
+              byvoxel/user-create:staging
             sudo docker system prune -af --volumes || true
