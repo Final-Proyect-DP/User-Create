@@ -1,7 +1,7 @@
 name: Deploy Pull Request to Test Environment
 
 on:
-  pull_request:
+  push:
     branches: [staging]
 
 jobs:
@@ -63,6 +63,7 @@ jobs:
         uses: appleboy/ssh-action@v1.1.3
         with:
           host: ${{ matrix.ec2_instance }}
+
           username: ec2-user
           port: 22
           script_timeout: 120
