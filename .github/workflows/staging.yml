@@ -64,8 +64,7 @@ jobs:
           username: ec2-user
           port: 22
           timeout: 120
-          envs: 
-            TAG: ${{ needs.build_docker_image.outputs.image_tag }}
+          envs: TAG=${{ needs.build_docker_image.outputs.image_tag }}
           script: |
             set -e
             echo "Deploying image with tag: ${TAG##*:}"
