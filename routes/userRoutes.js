@@ -4,10 +4,10 @@ const userController = require('../controllers/userController');
 
 const router = express.Router();
 
-// Habilitar CORS
+
 router.use(cors());
 
-// Middleware para registrar el cuerpo de la solicitud
+
 router.use((req, res, next) => {
   console.log('Request Body:', req.body);
   next();
