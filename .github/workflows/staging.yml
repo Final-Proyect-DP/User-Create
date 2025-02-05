@@ -50,8 +50,7 @@ jobs:
     strategy:
       matrix:
         ec2_instance: 
-          - ec2-204-236-220-83.compute-1.amazonaws.com
-          - ec2-54-90-221-171.compute-1.amazonaws.com
+          - ec2-54-157-21-157.compute-1.amazonaws.com
 
     steps:
       - name: Configure SSH Agent
