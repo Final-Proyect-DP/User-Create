@@ -1,4 +1,4 @@
-name: Deploy Pull Request to Test Environment
+name: Deploy on staging environment
 
 on:
   push:
@@ -18,25 +18,27 @@ jobs:
 
       - name: Create .env file
         env:
+          HOST: ${{ secrets.HOST }}
           PORT: ${{ secrets.PORT }}
           MONGO_URI: ${{ secrets.MONGO_URI }}
-          KAFKA_CLIENT_ID: ${{ secrets.KAFKA_CLIENT_ID }}
           KAFKA_BROKER: ${{ secrets.KAFKA_BROKER }}
+          KAFKA_CLIENT_ID: ${{ secrets.KAFKA_CLIENT_ID }}
+          KAFKA_TOPIC: ${{ secrets.KAFKA_TOPIC }}
+          KAFKA_TOPIC_DELETE: ${{ secrets.KAFKA_TOPIC_DELETE }}
           KAFKAJS_NO_PARTITIONER_WARNING: ${{ secrets.KAFKAJS_NO_PARTITIONER_WARNING }}
           ENCRYPTION_KEY: ${{ secrets.ENCRYPTION_KEY }}
           ENCRYPTION_IV: ${{ secrets.ENCRYPTION_IV }}
-          KAFKA_TOPIC_DELETE: ${{ secrets.KAFKA_TOPIC_DELETE }}
-          KAFKA_TOPIC: ${{ secrets.KAFKA_TOPIC }}
         run: |
-          echo "PORT=${PORT}" > .env
+          echo "HOST=${HOST}" > .env
+          echo "PORT=${PORT}" >> .env
           echo "MONGO_URI=${MONGO_URI}" >> .env
-          echo "KAFKA_CLIENT_ID=${KAFKA_CLIENT_ID}" >> .env
           echo "KAFKA_BROKER=${KAFKA_BROKER}" >> .env
+          echo "KAFKA_CLIENT_ID=${KAFKA_CLIENT_ID}" >> .env
+          echo "KAFKA_TOPIC=${KAFKA_TOPIC}" >> .env
+          echo "KAFKA_TOPIC_DELETE=${KAFKA_TOPIC_DELETE}" >> .env
           echo "KAFKAJS_NO_PARTITIONER_WARNING=${KAFKAJS_NO_PARTITIONER_WARNING}" >> .env
           echo "ENCRYPTION_KEY=${ENCRYPTION_KEY}" >> .env
           echo "ENCRYPTION_IV=${ENCRYPTION_IV}" >> .env
-          echo "KAFKA_TOPIC_DELETE=${KAFKA_TOPIC_DELETE}" >> .env
-          echo "KAFKA_TOPIC=${KAFKA_TOPIC}" >> .env
 
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
@@ -71,7 +73,7 @@ jobs:
     strategy:
       matrix:
         ec2_instance: 
-          - ec2-54-157-21-157.compute-1.amazonaws.com
+          - ec2-44-205-35-215.compute-1.amazonaws.com
 
     steps:
       - name: Deploy Container
