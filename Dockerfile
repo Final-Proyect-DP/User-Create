@@ -4,13 +4,13 @@ FROM node:22
 # Set the working directory
 WORKDIR /usr/src/app
 
-# Copy package.json and package-lock.json
-COPY package*.json ./
+# Copiar primero el package.json y el .env
+COPY package*.json .env ./
 
-# Install dependencies
+# Instalar dependencias
 RUN npm install
 
-# Copy the rest of the application code
+# Copiar el resto del código
 COPY . .
 
 # Expose the port the app runs on

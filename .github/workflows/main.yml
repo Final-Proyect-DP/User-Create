@@ -1,8 +1,9 @@
-name: Deploy on staging environment
+name: Deploy on Production environment
 
 on:
-  push:
-    branches: [staging]
+  pull_request:
+    types: [closed]
+    branches: [main]
 
 jobs:
   build_docker_image:
@@ -18,10 +19,10 @@ jobs:
 
       - name: Create .env file
         env:
-          HOST: ${{ secrets.HOST }}
+          HOST: ${{ secrets.HOST_PROD }}
           PORT: ${{ secrets.PORT }}
-          MONGO_URI: ${{ secrets.MONGO_URI }}
-          KAFKA_BROKER: ${{ secrets.KAFKA_BROKER }}
+          MONGO_URI: ${{ secrets.MONGO_URI_PROD }}
+          KAFKA_BROKER: ${{ secrets.KAFKA_BROKER_PROD }}
           KAFKA_CLIENT_ID: ${{ secrets.KAFKA_CLIENT_ID }}
           KAFKA_TOPIC: ${{ secrets.KAFKA_TOPIC }}
           KAFKA_TOPIC_DELETE: ${{ secrets.KAFKA_TOPIC_DELETE }}
@@ -55,14 +56,14 @@ jobs:
         with:
           images: byvoxel/user-create
           tags: |
-            type=raw,value=staging
+            type=raw,value=production
           
       - name: Build and push Docker image
         uses: docker/build-push-action@v5
         with:
           context: .
           push: true
-          tags: byvoxel/user-create:staging
+          tags: byvoxel/user-create:production
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
@@ -73,7 +74,7 @@ jobs:
     strategy:
       matrix:
         ec2_instance: 
-          - ec2-44-205-35-215.compute-1.amazonaws.com
+          - ec2-18-235-70-135.compute-1.amazonaws.com
 
     steps:
       - name: Deploy Container
@@ -81,18 +82,18 @@ jobs:
         with:
           host: ${{ matrix.ec2_instance }}
           username: ec2-user
-          key: ${{ secrets.EC2_SSH_KEY1 }}
+          key: ${{ secrets.EC2_SSH_KEY_PROD }}
           port: 22
           timeout: "120s"
           script: |
             set -e
-            echo "Deploying image: byvoxel/user-create:staging"
+            echo "Deploying image: byvoxel/user-create:production"
             sudo docker stop user-create || true
             sudo docker rm user-create || true
-            sudo docker pull byvoxel/user-create:staging
+            sudo docker pull byvoxel/user-create:production
             sudo docker run -d \
               --name user-create \
               -p 3020:3020 \
               --restart unless-stopped \
-              byvoxel/user-create:staging
+              byvoxel/user-create:production
             sudo docker system prune -af --volumes || true
