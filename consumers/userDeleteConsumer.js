@@ -2,7 +2,7 @@ const kafka = require('../config/kafkaConfig');
 const { decryptMessage } = require('../services/userService');
 const User = require('../models/User');
 
-const consumer = kafka.consumer({ groupId: 'User-Create-Delete-Consummer' });
+const consumer = kafka.consumer({ groupId: 'User-Create-Delete-Consumer' });
 
 const run = async () => {
   try {

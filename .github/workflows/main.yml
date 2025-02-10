@@ -1,8 +1,8 @@
-name: Deploy Pull Request to Test Environment
+name: Deploy on Production environment
 
 on:
   pull_request:
-    branches: [main]
+    branches: [production]
 
 jobs:
   build_docker_image:
@@ -15,6 +15,30 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
+
+      - name: Create .env file
+        env:
+          HOST: ${{ secrets.HOST_PROD }}
+          PORT: ${{ secrets.PORT }}
+          MONGO_URI: ${{ secrets.MONGO_URI_PROD }}
+          KAFKA_BROKER: ${{ secrets.KAFKA_BROKER_PROD }}
+          KAFKA_CLIENT_ID: ${{ secrets.KAFKA_CLIENT_ID }}
+          KAFKA_TOPIC: ${{ secrets.KAFKA_TOPIC }}
+          KAFKA_TOPIC_DELETE: ${{ secrets.KAFKA_TOPIC_DELETE }}
+          KAFKAJS_NO_PARTITIONER_WARNING: ${{ secrets.KAFKAJS_NO_PARTITIONER_WARNING }}
+          ENCRYPTION_KEY: ${{ secrets.ENCRYPTION_KEY }}
+          ENCRYPTION_IV: ${{ secrets.ENCRYPTION_IV }}
+        run: |
+          echo "HOST=${HOST}" > .env
+          echo "PORT=${PORT}" >> .env
+          echo "MONGO_URI=${MONGO_URI}" >> .env
+          echo "KAFKA_BROKER=${KAFKA_BROKER}" >> .env
+          echo "KAFKA_CLIENT_ID=${KAFKA_CLIENT_ID}" >> .env
+          echo "KAFKA_TOPIC=${KAFKA_TOPIC}" >> .env
+          echo "KAFKA_TOPIC_DELETE=${KAFKA_TOPIC_DELETE}" >> .env
+          echo "KAFKAJS_NO_PARTITIONER_WARNING=${KAFKAJS_NO_PARTITIONER_WARNING}" >> .env
+          echo "ENCRYPTION_KEY=${ENCRYPTION_KEY}" >> .env
+          echo "ENCRYPTION_IV=${ENCRYPTION_IV}" >> .env
 
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
@@ -31,15 +55,14 @@ jobs:
         with:
           images: byvoxel/user-create
           tags: |
-            type=raw,value=pr-${{ github.event.pull_request.number }}
-            type=sha
-
+            type=raw,value=production
+          
       - name: Build and push Docker image
         uses: docker/build-push-action@v5
         with:
           context: .
           push: true
-          tags: ${{ steps.meta.outputs.tags }}
+          tags: byvoxel/user-create:production
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
@@ -50,32 +73,26 @@ jobs:
     strategy:
       matrix:
         ec2_instance: 
-          - ec2-204-236-220-83.compute-1.amazonaws.com
-          - ec2-54-90-221-171.compute-1.amazonaws.com
+          - ec2-18-235-70-135.compute-1.amazonaws.com
 
     steps:
-      - name: Configure SSH Agent
-        uses: webfactory/ssh-agent@v0.8.0
-        with:
-          ssh-private-key: ${{ secrets.EC2_SSH_KEY }}
-
       - name: Deploy Container
-        uses: appleboy/ssh-action@v1.1.3
+        uses: appleboy/ssh-action@v1.0.0
         with:
           host: ${{ matrix.ec2_instance }}
           username: ec2-user
+          key: ${{ secrets.EC2_SSH_KEY_PROD }}
           port: 22
-          script_timeout: 120
-          envs: TAG=${{ needs.build_docker_image.outputs.image_tag }}
+          timeout: "120s"
           script: |
             set -e
-            echo "Deploying image: $TAG"
+            echo "Deploying image: byvoxel/user-create:production"
             sudo docker stop user-create || true
             sudo docker rm user-create || true
-            sudo docker pull byvoxel/user-create:$TAG
+            sudo docker pull byvoxel/user-create:production
             sudo docker run -d \
               --name user-create \
-              -p 3000:3020 \
+              -p 3020:3020 \
               --restart unless-stopped \
-              byvoxel/user-create:$TAG
+              byvoxel/user-create:production
             sudo docker system prune -af --volumes || true
