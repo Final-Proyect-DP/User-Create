@@ -2,6 +2,7 @@ name: Deploy on Production environment
 
 on:
   pull_request:
+    types: [closed]
     branches: [main]
 
 jobs:
