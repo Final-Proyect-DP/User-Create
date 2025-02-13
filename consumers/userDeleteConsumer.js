@@ -8,7 +8,7 @@ const run = async () => {
   try {
     await consumer.connect();
     await consumer.subscribe({ topic: process.env.KAFKA_TOPIC_DELETE, fromBeginning: true });
-
+//
     await consumer.run({
       eachMessage: async ({ message }) => {
         const decryptedMessage = decryptMessage(JSON.parse(message.value.toString()));
